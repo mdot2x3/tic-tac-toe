@@ -27,8 +27,12 @@ function GameBoard() {
         // check if board position is available
         if(board[row][column].getValue() === "--") {
             board[row][column].addMarker(player);
+            // marker successfully placed (used in playRound())
+            return true;
         } else {
             console.log("This spot is already taken, please choose another.");
+            // marker placement invalid (used in playRound())
+            return false;
         }
     };
     
@@ -59,6 +63,52 @@ function Cell() {
 }
 
 // manage game logic
-function GameController() {
+function GameController(playerOneName = "Player One", playerTwoName = "Player Two") {
     
+    const board = GameBoard();
+
+    // array of player objects, default names set in parameters unless assigned
+    const players = [
+        {
+            name: playerOneName,
+            token: "X"
+        },
+        {
+            name: playerTwoName,
+            token: "O"
+        }
+    ];
+
+    let activePlayer = players[0];
+
+    const getActivePlayer = () => activePlayer;
+
+    const switchPlayerTurn = () => {
+        activePlayer = activePlayer === players[0] ? players[1] : players[0];
+    };
+
+    const printNewRound = () => {
+        board.printBoard();
+        console.log(`${getActivePlayer().name}'s turn.`);
+    }
+
+    // play a round of the game, check for win or tie, reprint new board and switch player turn
+    const playRound = (row, column) => {
+        const moveSuccessful = board.placeMarker(row, column, activePlayer.token);
+        
+        if(moveSuccessful) {
+
+            //win logic here
+
+            //else
+            switchPlayerTurn();
+        }
+        // print board regardless of move success or failure
+        printNewRound();
+    };
+
+    // send initial play game message
+    printNewRound();
+
+    return { playRound, getActivePlayer };
 }
