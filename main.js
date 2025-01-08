@@ -68,7 +68,6 @@ function Cell() {
 
 // manage game logic
 function GameController(playerOneName = "Player One", playerTwoName = "Player Two") {
-    
     const boardReference = GameBoard();
 
     // array of player objects, default names set in parameters unless assigned
@@ -174,5 +173,57 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     // send initial play game message
     printNewRound();
 
-    return { playRound, getActivePlayer };
+    // create internal call for getBoard() that can be shared with ScreenController
+    // this helps maintain encapsulation, GameController() acts as a mediator between
+    // the UI and underlying data
+    const getBoard = () => boardReference.getBoard();
+
+    return { playRound, getActivePlayer, getBoard };
 }
+
+
+
+// update the screen with the state of the game board each turn
+function ScreenController() {
+    const gameReference = GameController();
+
+    const boardDiv = document.querySelector(".board");
+    const playerTurnDiv = document.querySelector(".turn");
+
+    const updateScreen = () => {
+        // clear the board on the DOM
+        boardDiv.textContent = "";
+
+        // fetch the most up-to-date board and active player
+        let updatedBoard = gameReference.getBoard();
+        let activePlayer = gameReference.getActivePlayer();
+
+        // render the current player's turn on the DOM
+        playerTurnDiv.textContent = `${activePlayer.name}'s turn...`;
+
+        // render each grid square on the DOM
+        updatedBoard.forEach((row, rowIndex) => {
+            row.forEach((cell, columnIndex) => {
+                // create clickable areas as buttons
+                const cellButton = document.createElement("button");
+                cellButton.classList.add("cell");
+                // Create a data attribute to identify the row and column of each cell created
+                // this makes it easier to pass into the `playRound` function
+                cellButton.dataset.row = rowIndex;
+                cellButton.dataset.column = columnIndex;
+                
+                cellButton.textContent = cell.getValue();
+                boardDiv.appendChild(cellButton);
+            })
+        })
+    }
+
+    function clickHandlerBoard(e) {
+
+    }    
+
+    // initial render
+    updateScreen();
+}
+
+ScreenController();
