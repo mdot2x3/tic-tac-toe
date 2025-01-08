@@ -202,13 +202,17 @@ function ScreenController() {
         playerTurnDiv.textContent = `${activePlayer.name}'s turn...`;
 
         // render each grid square on the DOM
+        // forEach('current row/cell being processed (0,1,or 2)', 'the index of the current row/column'(same 0,1,or2))
         updatedBoard.forEach((row, rowIndex) => {
             row.forEach((cell, columnIndex) => {
                 // create clickable areas as buttons
                 const cellButton = document.createElement("button");
                 cellButton.classList.add("cell");
-                // Create a data attribute to identify the row and column of each cell created
-                // this makes it easier to pass into the `playRound` function
+                // create a data attribute to identify the row and column of each cell created
+                // the data is stored in the DOM, this makes it easier to identify which button
+                // was clicked and be able to pass the coordinator data to the `playRound` function
+                // specifically, this creates a data-row/column attribute on the button and assigns
+                // it the value of rowIndex/columnIndex (the current row/column number)
                 cellButton.dataset.row = rowIndex;
                 cellButton.dataset.column = columnIndex;
                 
@@ -218,9 +222,19 @@ function ScreenController() {
         })
     }
 
+    // add event listener logic
     function clickHandlerBoard(e) {
+        const selectedRow = e.target.dataset.row;
+        const selectedColumn = e.target.dataset.column;
+        // ensure a valid element was clicked
+        if (!selectedRow || !selectedColumn) return;
 
-    }    
+        gameReference.playRound(selectedRow, selectedColumn);
+        updateScreen();
+    }
+
+    // use the clickHandlerBoard function logic to listen for clicks
+    boardDiv.addEventListener("click", clickHandlerBoard);
 
     // initial render
     updateScreen();
