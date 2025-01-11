@@ -1,0 +1,25 @@
+.container {
+  display: grid;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.board {
+  display: grid;
+  height: 500px;
+  width: 500px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  border: 1px solid black;
+  gap: 2px;
+  padding: 2px;
+  background-color: rgb(219, 247, 247);
+}
+
+.cell {
+  font-size: 5rem;
+  border: 1px solid grey;
+  background-color: azure;
+  cursor: pointer;
+}

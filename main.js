@@ -25,7 +25,7 @@ function GameBoard() {
 
     const placeMarker = (row, column, player) => {
         // check if board position is available
-        if (board[row][column].getValue() === "--") {
+        if (board[row][column].getValue() === " ") {
             board[row][column].addMarker(player);
             // marker successfully placed (used in playRound())
             return true;
@@ -53,10 +53,10 @@ function GameBoard() {
 // encapsulate behavior of a single cell on the game board
 function Cell() {
     // initial value
-    let value = "--";
+    let value = " ";
 
     const addMarker = (player) => {
-        if (value === "--") value = player;
+        if (value === " ") value = player;
     };
 
     const getValue = () => value;
@@ -147,8 +147,8 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
                 const valueB = boardArrayReference[b[0]][b[1]].getValue();
                 const valueC = boardArrayReference[c[0]][c[1]].getValue();
 
-                // check if all three values match, not including default "--"
-                if (valueA !== "--" && valueA === valueB && valueB === valueC) {
+                // check if all three values match, not including default " "
+                if (valueA !== " " && valueA === valueB && valueB === valueC) {
                     return true;
                 }
             }
@@ -159,7 +159,7 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
         function checkTie() {
             for (let row of boardArrayReference) {
                 for (let cell of row) {
-                    if(cell.getValue() === "--") {
+                    if(cell.getValue() === " ") {
                         // an empty cell still exists
                         return false;
                     }
