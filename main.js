@@ -30,7 +30,6 @@ function GameBoard() {
             // marker successfully placed (used in playRound())
             return true;
         } else {
-            console.log("This spot is already taken, please choose another.");
             // marker placement invalid (used in playRound())
             return false;
         }
@@ -95,6 +94,18 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
         console.log(`${getActivePlayer().name}'s turn.`);
     }
 
+    const declareWinner = () => {
+        return `${activePlayer.name} wins!`;
+    };
+
+    const declareTie = () => {
+        return "Tie game. Better luck next time!";
+    };
+
+    const invalidMove = () => {
+        return "This spot is already taken, please choose another.";
+    };
+
     // play a round of the game, check for win or tie, reprint new board and switch player turn
     const playRound = (row, column) => {
 
@@ -108,16 +119,19 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
         if (moveSuccessful) {
             if (checkWin()) {
                 console.log(`${activePlayer.name} wins!`);
-                return;
-            };
+                return "winner";
+            }
             if (checkTie()){
                 console.log("Tie game. Better luck next time!");
-                return;
+                return "tie";
             }
             //else
             switchPlayerTurn();
             printNewRound();
-        }
+        } else {
+            console.log("This spot is already taken, please choose another.");
+            return "invalid";
+            }
         
         function checkWin() {
             const winningCombinations = [
@@ -178,7 +192,7 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     // the UI and underlying data
     const getBoard = () => boardReference.getBoard();
 
-    return { playRound, getActivePlayer, getBoard };
+    return { playRound, getActivePlayer, getBoard, declareWinner, declareTie, invalidMove };
 }
 
 
@@ -189,6 +203,7 @@ function ScreenController() {
 
     const boardDiv = document.querySelector(".board");
     const playerTurnDiv = document.querySelector(".turn");
+    const messageDiv = document.querySelector(".message");
 
     const updateScreen = () => {
         // clear the board on the DOM
@@ -222,6 +237,11 @@ function ScreenController() {
         })
     }
 
+    // display content of message div
+    const displayMessage = (message) => {
+        messageDiv.textContent = message;
+    }
+   
     // add event listener logic
     function clickHandlerBoard(e) {
         const selectedRow = e.target.dataset.row;
@@ -229,8 +249,24 @@ function ScreenController() {
         // ensure a valid element was clicked
         if (!selectedRow || !selectedColumn) return;
 
-        gameReference.playRound(selectedRow, selectedColumn);
+        // after click, check game status and update message div
+        const status = gameReference.playRound(selectedRow, selectedColumn);
         updateScreen();
+
+        switch (status) {
+            case "winner":
+                displayMessage(gameReference.declareWinner());
+                break;
+            case "tie":
+                displayMessage(gameReference.declareTie());
+                break;
+            case "invalid":
+                displayMessage(gameReference.invalidMove());
+                break;
+            case "continue":
+                updateScreen();
+                break;
+        }
     }
 
     // use the clickHandlerBoard function logic to listen for clicks
