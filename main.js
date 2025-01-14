@@ -43,8 +43,21 @@ function GameBoard() {
         console.table(boardWithCells);
     };
 
+    // reset and reinitialize the 3x3 grid
+    const resetBoard = () => {
+        board = [];
+        for (let i = 0; i < rows; i++) {
+            // insert an empty array into each row position
+            board[i] = [];
+            for (let j = 0; j < columns; j++) {
+                // fill each empty row arrays with cell objects
+                board[i].push(Cell());
+            }
+        }
+    }
+
     // return public methods
-    return { getBoard, placeMarker, printBoard };
+    return { getBoard, placeMarker, printBoard, resetBoard };
 }
 
 
@@ -192,7 +205,12 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
     // the UI and underlying data
     const getBoard = () => boardReference.getBoard();
 
-    return { playRound, getActivePlayer, getBoard, declareWinner, declareTie, invalidMove };
+    const resetGame = () => {
+        boardReference.resetBoard();
+        activePlayer = players[0];
+    }
+
+    return { playRound, getActivePlayer, getBoard, declareWinner, declareTie, invalidMove, resetGame };
 }
 
 
@@ -204,6 +222,7 @@ function ScreenController() {
     const boardDiv = document.querySelector(".board");
     const playerTurnDiv = document.querySelector(".turn");
     const messageDiv = document.querySelector(".message");
+    const reset = document.querySelector(".reset");
 
     const updateScreen = () => {
         // clear the board on the DOM
@@ -249,6 +268,9 @@ function ScreenController() {
         // ensure a valid element was clicked
         if (!selectedRow || !selectedColumn) return;
 
+        // clear any existing message during the next round
+        displayMessage("");
+
         // after click, check game status and update message div
         const status = gameReference.playRound(selectedRow, selectedColumn);
         updateScreen();
@@ -274,6 +296,13 @@ function ScreenController() {
 
     // initial render
     updateScreen();
+
+    // event listener for reset button press
+    reset.addEventListener("click", () => {
+        gameReference.resetGame();
+        updateScreen();
+        displayMessage("")
+    })
 }
 
 ScreenController();
