@@ -33,7 +33,7 @@ function GameBoard() {
             // marker placement invalid (used in playRound())
             return false;
         }
-    };
+    }
     
     const printBoard = () => {
         // outer map iterates through each row, inner map iterates
@@ -41,7 +41,7 @@ function GameBoard() {
         const boardWithCells = board.map((row) => row.map((cell) => cell.getValue()));
         // render board as a table
         console.table(boardWithCells);
-    };
+    }
 
     // reset and reinitialize the 3x3 grid
     const resetBoard = () => {
@@ -92,15 +92,20 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
             name: playerTwoName,
             token: "O"
         }
-    ];
+    ]
 
     let activePlayer = players[0];
+
+    const setPlayerNames = (nameOne, nameTwo) => {
+        players[0].name = nameOne || players[0].name;
+        players[1].name = nameTwo || players[1].name;
+    }
 
     const getActivePlayer = () => activePlayer;
 
     const switchPlayerTurn = () => {
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
-    };
+    }
 
     const printNewRound = () => {
         boardReference.printBoard();
@@ -109,15 +114,15 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
 
     const declareWinner = () => {
         return `${activePlayer.name} wins!`;
-    };
+    }
 
     const declareTie = () => {
         return "Tie game. Better luck next time!";
-    };
+    }
 
     const invalidMove = () => {
         return "This spot is already taken, please choose another.";
-    };
+    }
 
     // play a round of the game, check for win or tie, reprint new board and switch player turn
     const playRound = (row, column) => {
@@ -161,7 +166,7 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
                 // Diagonals
                 [[0, 0], [1, 1], [2, 2]],
                 [[0, 2], [1, 1], [2, 0]]
-            ];
+            ]
 
             // check if all three cells contain the same player's token
             for (let combination of winningCombinations) {
@@ -195,7 +200,7 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
             // no empty cells exist, it is a tie
             return true;
         }
-    };
+    }
 
     // send initial play game message
     printNewRound();
@@ -210,7 +215,7 @@ function GameController(playerOneName = "Player One", playerTwoName = "Player Tw
         activePlayer = players[0];
     }
 
-    return { playRound, getActivePlayer, getBoard, declareWinner, declareTie, invalidMove, resetGame };
+    return { playRound, getActivePlayer, getBoard, declareWinner, declareTie, invalidMove, resetGame, setPlayerNames };
 }
 
 
@@ -223,6 +228,8 @@ function ScreenController() {
     const playerTurnDiv = document.querySelector(".turn");
     const messageDiv = document.querySelector(".message");
     const reset = document.querySelector(".reset");
+    const modalOverlay = document.querySelector(".modal-overlay");
+    const modalContent = document.querySelector(".modal-content");
 
     const updateScreen = () => {
         // clear the board on the DOM
@@ -260,6 +267,82 @@ function ScreenController() {
     const displayMessage = (message) => {
         messageDiv.textContent = message;
     }
+
+    const showModal = (content) => {
+        modalContent.innerHTML = content;
+        modalOverlay.style.display = "flex";
+        // rebind modal-specific events after content is injected
+        bindModalEvents();
+    }
+
+    const hideModal = () => {
+        modalOverlay.style.display = "none";
+    }
+
+    const bindModalEvents = () => {
+        const player1Input = document.querySelector("#player1");
+        const player2Input = document.querySelector("#player2");
+        const startGameButton = document.querySelector("#start-game");
+        const playAgainButton = document.querySelector("#play-again");
+        const homeScreenButton = document.querySelector("#home-screen");
+
+        //handle 'Start Game' button in homeScreenModal
+        if (startGameButton) {
+            startGameButton.addEventListener("click", () => {
+                const player1Name = player1Input.value || "Player One";
+                const player2Name = player2Input.value || "Player Two";
+    
+                // reset the game with new player names
+                gameReference.setPlayerNames(player1Name, player2Name);
+                hideModal();
+                updateScreen();
+                displayMessage("");
+            });
+        }
+
+        // handle 'Play Again' button in endGameModal modal
+        if (playAgainButton) {
+            playAgainButton.addEventListener("click", () => {
+                hideModal();
+                gameReference.resetGame();
+                updateScreen();
+                displayMessage("");
+            });
+        }
+
+        // handle 'Return to Home Screen' button in endGameModal modal
+        if (homeScreenButton) {
+            homeScreenButton.addEventListener("click", () => {
+                gameReference.resetGame();
+                homeScreenModal();
+            });
+        }
+    }
+
+    // render home screen modal and set up Start Game button functionality
+    const homeScreenModal = () => {
+        const homeScreenContent = `
+            <h1>It's time to play Tic-Tac-Toe!</h1>
+            <form id="player-form">
+                <label for="player1">Player One:</label>
+                <input type="text" id="player1" placeholder="Player One">
+                <label for="player2">Player Two:</label>
+                <input type="text" id="player2" placeholder="Player Two">
+                <button type="button" id="start-game">Start Game</button>
+            </form>
+        `;
+        showModal(homeScreenContent);
+    }
+
+    // dynamically modify modal window content for new game, win, or tie
+    const endGameModal = (result) => {
+        const endGameContent = `
+            <h1>${result}</h1>
+            <button id="play-again">Play Again</button>
+            <button id="home-screen">Return to Home Screen</button>
+        `;
+        showModal(endGameContent);
+    }
    
     // add event listener logic
     function clickHandlerBoard(e) {
@@ -277,16 +360,13 @@ function ScreenController() {
 
         switch (status) {
             case "winner":
-                displayMessage(gameReference.declareWinner());
+                endGameModal(gameReference.declareWinner());
                 break;
             case "tie":
-                displayMessage(gameReference.declareTie());
+                endGameModal(gameReference.declareTie());
                 break;
             case "invalid":
                 displayMessage(gameReference.invalidMove());
-                break;
-            case "continue":
-                updateScreen();
                 break;
         }
     }
@@ -294,15 +374,17 @@ function ScreenController() {
     // use the clickHandlerBoard function logic to listen for clicks
     boardDiv.addEventListener("click", clickHandlerBoard);
 
-    // initial render
-    updateScreen();
-
     // event listener for reset button press
     reset.addEventListener("click", () => {
         gameReference.resetGame();
         updateScreen();
         displayMessage("")
-    })
+    });
+
+    // show modal on load
+    homeScreenModal();
+    // initial render
+    updateScreen();
 }
 
 ScreenController();
