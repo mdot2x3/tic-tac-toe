@@ -374,6 +374,12 @@ function ScreenController() {
     // use the clickHandlerBoard function logic to listen for clicks
     boardDiv.addEventListener("click", clickHandlerBoard);
 
+    // event listener for Return to Home Screen button press
+    document.querySelector(".home").addEventListener("click", () => {
+        gameReference.resetGame();
+        homeScreenModal();
+    });
+
     // event listener for reset button press
     reset.addEventListener("click", () => {
         gameReference.resetGame();
