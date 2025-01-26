@@ -339,7 +339,7 @@ function ScreenController() {
         const endGameContent = `
             <h1>${result}</h1>
             <button id="play-again">Play Again</button>
-            <button id="home-screen">Return to Home Screen</button>
+            <button id="home-screen">Home Screen</button>
         `;
         showModal(endGameContent);
     }
