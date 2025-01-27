@@ -6,7 +6,7 @@ body, html {
   margin: 0;
   padding: 0;
   height: 100%;
-  /* Prevent scrollbars */
+  /* Prevent scroll bars */
   overflow: hidden;
 }
 
@@ -81,6 +81,10 @@ body, html {
 
 .modal button:hover {
   background: #0056b3;
+}
+
+.modal h1 {
+  margin-bottom: 20px;
 }
 
 .board-buttons {
